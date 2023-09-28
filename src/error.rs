@@ -1,6 +1,4 @@
-use thiserror::Error;
-
-pub type Result<T> = std::result::Result<T, SoilMoistureSensorError>;
+use thiserror_no_std::Error;
 
 #[derive(Error, Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum SoilMoistureSensorError {
