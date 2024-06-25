@@ -1,7 +1,7 @@
 #![no_std]
 
-use embedded_hal::blocking::delay::DelayUs;
-use embedded_hal::blocking::i2c;
+use embedded_hal::delay::DelayNs;
+use embedded_hal::i2c::I2c;
 
 pub mod error;
 use crate::error::SoilMoistureSensorError;
@@ -30,23 +30,23 @@ pub struct SoilSensor<I2C: 'static + Send + Sync, D> {
     // https://github.com/adafruit/Adafruit_Seesaw/blob/8728936a5d1a0a7bf2887a82adb0828b70556a45/Adafruit_seesaw.cpp#L737
     delay: D,
     unit: TemperatureUnit,
-    temp_delay: u16,
-    moisture_delay: u16,
+    temp_delay: u32,
+    moisture_delay: u32,
     address: u8,
 }
 
 impl<I2C, D> SoilSensor<I2C, D>
 where
     I2C: 'static + Send + Sync,
-    D: DelayUs<u16>,
+    D: DelayNs,
 {
     pub fn new(i2c: I2C, delay: D) -> Self {
         Self {
             i2c,
             delay,
             unit: TemperatureUnit::Fahrenheit,
-            temp_delay: 125,
-            moisture_delay: 5000,
+            temp_delay: 125000,
+            moisture_delay: 5000000,
             address: 0x36,
         }
     }
@@ -74,7 +74,8 @@ where
         self
     }
 
-    pub fn with_delay(mut self, temp: u16, moisture: u16) -> Self {
+    /// Sets the reading delay in nanoseconds
+    pub fn with_delay(mut self, temp: u32, moisture: u32) -> Self {
         self.temp_delay = temp;
         self.moisture_delay = moisture;
         self
@@ -83,8 +84,8 @@ where
 
 impl<I2C, D> SoilSensor<I2C, D>
 where
-    I2C: i2c::Write + i2c::Read + Send + Sync,
-    D: DelayUs<u16>,
+    I2C: I2c + Send + Sync,
+    D: DelayNs,
 {
     pub fn temperature(&mut self) -> Result<f32, SoilMoistureSensorError> {
         let mut buffer = [0; 4];
@@ -106,12 +107,12 @@ where
         &mut self,
         bytes: &[u8],
         buffer: &mut [u8],
-        delay: u16,
+        delay_ns: u32,
     ) -> Result<(), SoilMoistureSensorError> {
         self.i2c
             .write(self.address, bytes)
             .map_err(|_| SoilMoistureSensorError::WriteI2CError)?;
-        self.delay.delay_us(delay);
+        self.delay.delay_ns(delay_ns);
         self.i2c
             .read(self.address, buffer)
             .map_err(|_| SoilMoistureSensorError::ReadI2CError)
