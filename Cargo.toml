@@ -1,7 +1,7 @@
 [package]
 name = "stemma_soil_moisture_sensor"
 description = "A pure generic I2C crate for the Adafruit STEMMA soil moisture sensor "
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/FloppyDisck/STEMMA_soil_moisture_sensor"
@@ -14,9 +14,4 @@ categories = ["embedded"]
 
 [dependencies]
 embedded-hal = "1.0.0"
-crc = "3.0.0"
-thiserror-no-std = "2.0.2"
-
-[dev-dependencies]
-embedded-hal-mock = "0.11.1"
-rstest = "0.21.0"
+thiserror = { version = "2.0.3", default-features = false }
