@@ -12,10 +12,14 @@ use stemma_soil_moisture_sensor::prelude::*;
 
 fn main() -> Result<(), SoilMoistureSensorError> {
     // Setup your I2C and import relevant delay
-    let i2c = ...;
 
-    let moisture = SoilSensor::new(i2c, Delay).with_units(TemperatureUnit::Fahrenheit);
-    let temp = moisture.temperature()?;
-    let moist = moisture.moisture()?;
+    let sensor = SoilSensor::new(i2c, delay).with_units(TemperatureUnit::Fahrenheit);
+    // Full
+    let reading = sensor.read()?;
+    let temp = reading.temperature;
+    let moist = reading.moisture;
+    // Individual
+    let temp = sensor.temperature()?;
+    let moist = sensor.moisture()?;
 }
 ```

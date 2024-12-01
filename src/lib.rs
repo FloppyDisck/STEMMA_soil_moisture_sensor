@@ -12,7 +12,7 @@ pub mod prelude {
 }
 
 const TEMP_C_CONSTANT: f32 = 0.000015258789;
-const TEMP_F_CONSTANT: f32 = 0.000027466; // TEMP_C_CONSTANT * 1.8
+const TEMP_F_CONSTANT: f32 = TEMP_C_CONSTANT * 1.8;
 const TEMP_F_CONSTANT_SUM: f32 = 32.0;
 
 /// Influences what the reading temperature numbers are
@@ -80,6 +80,21 @@ where
         self.moisture_delay = moisture;
         self
     }
+
+    pub fn with_temperature_delay(mut self, temp: u32) -> Self {
+        self.temp_delay = temp;
+        self
+    }
+
+    pub fn with_moisture_delay(mut self, moisture: u32) -> Self {
+        self.moisture_delay = moisture;
+        self
+    }
+}
+
+pub struct Reading {
+    pub temperature: f32,
+    pub moisture: u16,
 }
 
 impl<I2C, D> SoilSensor<I2C, D>
@@ -101,6 +116,13 @@ where
         let mut buffer = [0; 2];
         self.i2c_read(&[0x0F, 0x10], &mut buffer, self.moisture_delay)?;
         Ok(u16::from_be_bytes(buffer))
+    }
+
+    pub fn read(&mut self) -> Result<Reading, SoilMoistureSensorError> {
+        Ok(Reading {
+            temperature: self.temperature()?,
+            moisture: self.moisture()?,
+        })
     }
 
     fn i2c_read(

@@ -1,4 +1,4 @@
-use thiserror_no_std::Error;
+use thiserror::Error;
 
 #[derive(Error, Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum SoilMoistureSensorError {
